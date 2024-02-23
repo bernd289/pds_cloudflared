@@ -1,0 +1,32 @@
+version: '3.9'
+services:
+  pds:
+    container_name: pds
+    image: ghcr.io/bluesky-social/pds:latest
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /pds
+        target: /pds
+    env_file:
+      - /pds/pds.env
+
+  tunnel:
+    container_name: cloudflared-tunnel
+    image: cloudflare/cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=MY_TOKEN
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower:latest
+    volumes:
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    restart: unless-stopped
+    environment:
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_SCHEDULE: "@midnight"
